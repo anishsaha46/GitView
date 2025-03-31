@@ -7,3 +7,7 @@ interface FileNode{
     type: "file" | "dir"
     children?: FileNode[]
 }
+
+interface FileStructureTreeProps {
+    data: FileNode[]
+  }
