@@ -37,4 +37,30 @@ function TreeNode({node,level}:TreeNodeProps){
   const toggleExpand = () => {
     setIsExpanded(!isExpaded)
   }
+
+  const getFileIcon = (fileName: string) => {
+    const extension = fileName.split(".").pop()?.toLowerCase()
+
+    // Return different colors based on file extension
+    switch (extension) {
+      case "js":
+        return <File className="h-4 w-4 text-yellow-500" />
+      case "jsx":
+        return <File className="h-4 w-4 text-blue-400" />
+      case "ts":
+        return <File className="h-4 w-4 text-blue-600" />
+      case "tsx":
+        return <File className="h-4 w-4 text-blue-500" />
+      case "json":
+        return <File className="h-4 w-4 text-yellow-600" />
+      case "md":
+        return <File className="h-4 w-4 text-gray-500" />
+      case "css":
+        return <File className="h-4 w-4 text-pink-500" />
+      case "html":
+        return <File className="h-4 w-4 text-orange-500" />
+      default:
+        return <File className="h-4 w-4" />
+    }
+  }
 }
