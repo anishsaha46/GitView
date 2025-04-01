@@ -20,3 +20,16 @@ interface DependencyNode {
       links: DependencyLink[]
     }
   }
+
+  export default function CodeDependencyGraph({data}:
+    CodeDependencyGraphProps) {
+    const svgRef = useRef<SVGSVGElement>(null)
+    useEffect(()=>{
+        if(!svgRef.current || !data.nodes.length) return
+        const width = svgRef.current.clientWidth
+        const height = svgRef.current.clientHeight
+
+        // clear previous graph elements
+        d3.select(svgRef.current).selectAll("*").remove()
+    })
+    }
