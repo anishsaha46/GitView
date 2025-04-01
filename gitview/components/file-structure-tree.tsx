@@ -30,12 +30,13 @@ interface TreeNodeProps {
   level: number
 }
 
-function TreeNode({node,level}:TreeNodeProps){
-  const [isExpaded,setIsExpanded]= useState(level < 1)
+function TreeNode({ node, level }: TreeNodeProps) {
+  const [isExpanded, setIsExpanded] = useState(level < 1)
   const hasChildren = node.children && node.children.length > 0
-  const fileName=node.path.split("/").pop() || node.path
+  const fileName = node.path.split("/").pop() || node.path
+
   const toggleExpand = () => {
-    setIsExpanded(!isExpaded)
+    setIsExpanded(!isExpanded)
   }
 
   const getFileIcon = (fileName: string) => {
@@ -63,4 +64,37 @@ function TreeNode({node,level}:TreeNodeProps){
         return <File className="h-4 w-4" />
     }
   }
+
+  return (
+    <li>
+      <div
+        className={`flex items-center gap-1 py-1 px-1 rounded hover:bg-muted cursor-pointer`}
+        style={{ paddingLeft: `${level * 16}px` }}
+        onClick={hasChildren ? toggleExpand : undefined}
+      >
+        {hasChildren ? (
+          isExpanded ? (
+            <ChevronDown className="h-4 w-4 shrink-0" />
+          ) : (
+            <ChevronRight className="h-4 w-4 shrink-0" />
+          )
+        ) : (
+          <span className="w-4" />
+        )}
+
+        {node.type === "dir" ? <Folder className="h-4 w-4 text-blue-500 shrink-0" /> : getFileIcon(fileName)}
+
+        <span className="truncate">{fileName}</span>
+      </div>
+
+      {hasChildren && isExpanded && (
+        <ul>
+          {node.children!.map((childNode) => (
+            <TreeNode key={childNode.path} node={childNode} level={level + 1} />
+          ))}
+        </ul>
+      )}
+    </li>
+  )
 }
+
