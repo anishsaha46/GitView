@@ -24,3 +24,8 @@ export default function FileStructureTree({ data }: FileStructureTreeProps) {
     </div>
   )
 }
+
+interface TreeNodeProps {
+  node: FileNode
+  level: number
+}
