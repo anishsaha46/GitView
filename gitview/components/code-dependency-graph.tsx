@@ -47,4 +47,23 @@ interface DependencyNode {
       .force("charge", d3.forceManyBody().strength(-300))
       .force("center", d3.forceCenter(width / 2, height / 2))
       .force("collision", d3.forceCollide().radius(50))
-    })
+    
+
+          // Create the SVG elements
+    const svg = d3.select(svgRef.current).attr("viewBox", [0, 0, width, height])
+
+    // Add zoom functionality
+    const g = svg.append("g")
+
+    svg.call(
+      d3
+        .zoom()
+        .extent([
+          [0, 0],
+          [width, height],
+        ])
+        .scaleExtent([0.1, 8])
+        .on("zoom", (event) => {
+          g.attr("transform", event.transform)
+        }),
+    )
