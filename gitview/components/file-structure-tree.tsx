@@ -29,3 +29,12 @@ interface TreeNodeProps {
   node: FileNode
   level: number
 }
+
+function TreeNode({node,level}:TreeNodeProps){
+  const [isExpaded,setIsExpanded]= useState(level < 1)
+  const hasChildren = node.children && node.children.length > 0
+  const fileName=node.path.split("/").pop() || node.path
+  const toggleExpand = () => {
+    setIsExpanded(!isExpaded)
+  }
+}
