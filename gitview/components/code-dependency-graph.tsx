@@ -152,5 +152,26 @@ interface DependencyNode {
       }
       return d3.drag().on("start", dragstarted).on("drag", dragged).on("end", dragended).on("end", dragended)
     }
+
+        // Color nodes based on file type
+        function getNodeColor(type: string): string {
+          const colorMap: { [key: string]: string } = {
+            js: "#f7df1e",
+            jsx: "#61dafb",
+            ts: "#3178c6",
+            tsx: "#61dafb",
+            py: "#3776ab",
+            java: "#b07219",
+            go: "#00add8",
+            rb: "#cc342d",
+            php: "#4f5d95",
+            c: "#555555",
+            cpp: "#f34b7d",
+            cs: "#178600",
+            default: "#999999",
+          }
     
+          return colorMap[type] || colorMap.default
+        }
+
   })
