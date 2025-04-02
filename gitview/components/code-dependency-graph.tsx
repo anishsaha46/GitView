@@ -133,4 +133,24 @@ interface DependencyNode {
 
       node.attr("transform", (d: any) => `translate(${d.x},${d.y})`)
     })
+
+    // drag functionality
+    function drop(simulation,d3.simulation<d3.SimulationNodeDatum,undefined>) {
+      function dragstarted(event:any){
+        if(!event.active) simulation.alphaTarget(0.3).restart()
+        event.subject.fx = event.subject.x
+        event.subject.fy = event.subject.y
+      }
+      function dragged(event:any){
+        event.subject.fx = event.x
+        event.subject.fy = event.y
+      }
+      function dragended(event:any){
+        if(!event.active) simulation.alphaTarget(0)
+        event.subject.fx = null
+        event.subject.fy = null
+      }
+      return d3.drag().on("start", dragstarted).on("drag", dragged).on("end", dragended).on("end", dragended)
+    }
+    
   })
