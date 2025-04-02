@@ -93,4 +93,13 @@ interface DependencyNode {
         .attr("stroke-opacity", 0.6)
         .attr("stroke-width", 1.5)
         .attr("marker-end", "url(#arrowhead)")
+
+     // Create nodes
+    const node = g
+    .append("g")
+    .selectAll(".node")
+    .data(data.nodes)
+    .join("g")
+    .attr("class", "node")
+    .call(drag(simulation))
   })
