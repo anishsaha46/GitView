@@ -67,3 +67,19 @@ interface DependencyNode {
           g.attr("transform", event.transform)
         }),
     )
+
+    // define arrow markers for links
+    svg
+    .append("defs")
+    .append("marker")
+    .attr("id", "arrowhead")
+    .attr("viewBox", "0 -5 10 10")
+    .attr("refX", 20)
+    .attr("refY", 0)
+    .attr("orient", "auto")
+    .attr("markerWidth", 6)
+    .attr("markerHeight", 6)
+    .append("path")
+    .attr("d", "M0,-5L10,0L0,5")
+    .attr("fill", "#999")
+  })
