@@ -82,4 +82,15 @@ interface DependencyNode {
     .append("path")
     .attr("d", "M0,-5L10,0L0,5")
     .attr("fill", "#999")
+
+        // Create links
+        const link = g
+        .append("g")
+        .selectAll("line")
+        .data(data.links)
+        .join("line")
+        .attr("stroke", "#999")
+        .attr("stroke-opacity", 0.6)
+        .attr("stroke-width", 1.5)
+        .attr("marker-end", "url(#arrowhead)")
   })
