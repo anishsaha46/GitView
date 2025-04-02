@@ -102,4 +102,21 @@ interface DependencyNode {
     .join("g")
     .attr("class", "node")
     .call(drag(simulation))
+
+        // Add circles to nodes
+        node
+        .append("circle")
+        .attr("r", 8)
+        .attr("fill", (d: any) => getNodeColor(d.type))
+        .attr("stroke", "#fff")
+        .attr("stroke-width", 1.5)
+  
+      // Add labels to nodes
+      node
+        .append("text")
+        .attr("dx", 12)
+        .attr("dy", ".35em")
+        .text((d: any) => d.label)
+        .attr("font-size", "10px")
+        .attr("fill", "#333")
   })
