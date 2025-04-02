@@ -18,3 +18,40 @@ interface Repository {
     updated_at: string
     language: string
   }
+
+  export default function Dashboard() {
+    const {data:session,status} = useSession()
+    const [repositories, setRepositories] = useState<Repository[]>([])
+    const [loading, setLoading] = useState(false)
+    const [searchQuery, setSearchQuery] = useState("")
+
+    useEffect(()=>{
+        if(status === "unauthenticated"){
+            redirect("/")
+        }
+        if(status === "authenticated" && session?.accessToken){
+            fetchRepositories(session.accessToken as string)
+        }
+    },[status, session])
+
+    const fetchRepositories = async (accessToken: string) => {
+        try{
+            const response = await fetch("https://api.github.com/user/repos?sort=updated&per_page=100", {
+                headers: {
+                  Authorization: `Bearer ${accessToken}`,
+                },
+        })
+
+        if(response.ok){
+            const data = await response.json()
+            setRepositories(data)
+        }else{
+            console.error("Failed to fetch repositories")
+        }
+    } catch(error){
+        console.error("Error fetching repositories:", error)
+        }finally{
+            setLoading(false)
+        }
+    }
+  }
