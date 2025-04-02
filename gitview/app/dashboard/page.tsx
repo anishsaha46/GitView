@@ -54,4 +54,10 @@ interface Repository {
             setLoading(false)
         }
     }
+
+    const filteredRepositories = repositories.filter(
+        (repo) =>
+          repo.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          (repo.description && repo.description.toLowerCase().includes(searchQuery.toLowerCase())),
+      )
   }
