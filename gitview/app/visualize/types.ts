@@ -22,4 +22,11 @@ export interface DependencyNode {
     links: DependencyLink[]
   }
 
-  
+  export interface GitHubTreeItem {
+    path: string
+    mode: string
+    type: string
+    sha: string
+    size?: number
+    url: string
+  }
