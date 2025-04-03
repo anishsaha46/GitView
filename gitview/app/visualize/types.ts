@@ -51,3 +51,16 @@ export interface DependencyNode {
     content: string
     encoding: string
   }
+
+  export interface GitHubRepoResponse {
+    id: number
+    name: string
+    full_name: string
+    default_branch: string
+    private: boolean
+    owner: {
+      login: string
+      id: number
+      avatar_url: string
+    }
+  }
