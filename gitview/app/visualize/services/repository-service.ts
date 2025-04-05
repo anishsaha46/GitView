@@ -36,3 +36,30 @@ export async function fetchRepositoryData(
     const repoInfo: GitHubRepoResponse = await response.json()
     return repoInfo.default_branch || "main"
   }
+
+
+  async function fetchRepositoryTree(
+    username: string,
+    repoName: string,
+    branch: string,
+    accessToken: string,
+  ): Promise<GitHubTreeResponse> {
+    const response = await fetch(`https://api.github.com/repos/${username}/${repoName}/git/trees/${branch}?recursive=1`, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    })
+  
+    if (!response.ok) {
+      handleApiError(response)
+    }
+  
+    const data: GitHubTreeResponse = await response.json()
+  
+    if (data.truncated) {
+      console.warn("Repository is too large, some files may not be shown")
+    }
+  
+    return data
+  }
+  
