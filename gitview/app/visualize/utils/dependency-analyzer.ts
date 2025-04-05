@@ -67,3 +67,27 @@ export async function analyzeDependencies(
 
   return { nodes, links }
 }
+
+async function fetchFileContent(
+    username: string,
+    repoName: string,
+    filePath: string,
+    branch: string,
+    accessToken: string,
+  ): Promise<string> {
+    const response = await fetch(
+      `https://api.github.com/repos/${username}/${repoName}/contents/${filePath}?ref=${branch}`,
+      {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      },
+    )
+  
+    if (!response.ok) {
+      throw new Error(`Failed to fetch content for ${filePath}: ${response.statusText}`)
+    }
+  
+    const contentData: GitHubContentResponse = await response.json()
+    return contentData.content ? atob(contentData.content) : ""
+  }
