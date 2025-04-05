@@ -21,3 +21,18 @@ export async function fetchRepositoryData(
   
     return { fileStructure, dependencies }
   }
+
+  async function fetchDefaultBranch(username: string, repoName: string, accessToken: string): Promise<string> {
+    const response = await fetch(`https://api.github.com/repos/${username}/${repoName}`, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    })
+  
+    if (!response.ok) {
+      handleApiError(response)
+    }
+  
+    const repoInfo: GitHubRepoResponse = await response.json()
+    return repoInfo.default_branch || "main"
+  }
