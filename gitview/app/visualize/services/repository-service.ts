@@ -62,4 +62,23 @@ export async function fetchRepositoryData(
   
     return data
   }
+
+
+  function handleApiError(response: Response): never {
+    if (response.status === 404) {
+      throw new Error("Repository or branch not found")
+    } else if (response.status === 401) {
+      throw new Error("Authentication error. Please log in again.")
+    } else if (response.status === 403) {
+      const rateLimitRemaining = response.headers.get("x-ratelimit-remaining")
+      if (rateLimitRemaining === "0") {
+        throw new Error("GitHub API rate limit exceeded. Please try again later.")
+      }
+      throw new Error("Access forbidden. You may not have permission to view this repository.")
+    } else if (response.status === 409) {
+      throw new Error("Repository is empty")
+    } else {
+      throw new Error(`GitHub API error: ${response.statusText}`)
+    }
+  }
   
