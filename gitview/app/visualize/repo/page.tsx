@@ -31,4 +31,25 @@ export default function VisualizeRepo({ params }: { params: { repo: string } }) 
         loadRepositoryData(session.accessToken as string)
       }
     }, [status, session, params.repo])
+
+    const loadRepositoryData = async (accessToken: string) => {
+        setLoading(true)
+        setError(null)
+    
+        try {
+          const { fileStructure, dependencies } = await fetchRepositoryData(
+            session?.user?.name || "",
+            params.repo,
+            accessToken,
+          )
+    
+          setFileStructure(fileStructure)
+          setDependencies(dependencies)
+        } catch (error) {
+          console.error("Error loading repository data:", error)
+          setError(error instanceof Error ? error.message : "Failed to load repository data")
+        } finally {
+          setLoading(false)
+        }
+      }
 }
