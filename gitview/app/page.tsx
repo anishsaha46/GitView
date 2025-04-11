@@ -1,8 +1,6 @@
 "use client"
 
 import { useState, useEffect, useRef } from "react"
-import Link from "next/link"
-import Image from "next/image"
 import { motion } from "framer-motion"
 import { Github, ArrowRight, Code, GitBranch, GitMerge, GitPullRequest, ExternalLink, ChevronDown, LogOut } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -12,13 +10,14 @@ import FeatureCard from "@/components/feature-card"
 import TestimonialCard from "@/components/testimonial-card"
 import { useMobile } from "./hooks/use-mobile"
 import { useSession, signOut } from "next-auth/react"
+import Link from "next/link"
 
 
 export default function Home() {
   const [scrolled, setScrolled] = useState(false)
   const demoRef = useRef<HTMLDivElement>(null)
   const isMobile = useMobile()
-  const { data: session, status } = useSession()
+  const { status } = useSession()
 
   useEffect(() => {
     const handleScroll = () => {
