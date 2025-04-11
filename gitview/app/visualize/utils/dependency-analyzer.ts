@@ -24,6 +24,7 @@ export async function analyzeDependencies(
   const nodes: DependencyNode[] = []
   const links: DependencyLink[] = []
   const importMap = new Map<string, string[]>()
+  const nodeMap = new Map<string, DependencyNode>()
 
   // Fetch and analyze files in parallel with rate limiting
   const analyzePromises = filesToAnalyze.map(async (file, index) => {
@@ -35,11 +36,13 @@ export async function analyzeDependencies(
 
       // Add node
       const fileExt = file.path.split(".").pop() || "file"
-      nodes.push({
+      const node = {
         id: file.path,
         label: file.path.split("/").pop() || "",
         type: fileExt,
-      })
+      }
+      nodes.push(node)
+      nodeMap.set(file.path, node)
 
       // Extract imports based on file type
       const imports = extractImports(content, fileExt, file.path)
@@ -51,12 +54,14 @@ export async function analyzeDependencies(
 
   await Promise.all(analyzePromises)
 
-  // Create links based on actual imports
+  // Create links based on actual imports, only if both nodes exist
   importMap.forEach((imports, filePath) => {
+    if (!nodeMap.has(filePath)) return // Skip if source node doesn't exist
+
     imports.forEach((importPath) => {
       // Find the actual file that matches the import
       const targetFile = findMatchingFile(importPath, filePath, codeFiles)
-      if (targetFile) {
+      if (targetFile && nodeMap.has(targetFile)) { // Only create link if both nodes exist
         links.push({
           source: filePath,
           target: targetFile,
@@ -163,25 +168,36 @@ async function fetchFileContent(
       }
     }
   
-    // Handle package imports (simplified)
+    // Handle package imports
     else {
-      // For package imports, just find files with matching names
+      // Skip node_modules imports and built-in modules
+      if (importPath.includes("node_modules") || 
+          importPath.startsWith("@") || 
+          importPath.includes("/")) {
+        return null
+      }
+
+      // For local package imports, try to find exact matches first
       const importName = importPath.split("/").pop()
       if (!importName) return null
-  
-      const possibleMatches = allFiles.filter((f) => {
+
+      // First try exact file name match
+      const exactMatch = allFiles.find((f) => {
         const fileName = f.path.split("/").pop() || ""
-        return (
-          fileName.startsWith(importName) ||
-          fileName === `${importName}.js` ||
-          fileName === `${importName}.jsx` ||
-          fileName === `${importName}.ts` ||
-          fileName === `${importName}.tsx`
-        )
+        return fileName === importName || 
+               fileName === `${importName}.js` || 
+               fileName === `${importName}.jsx` || 
+               fileName === `${importName}.ts` || 
+               fileName === `${importName}.tsx`
       })
-  
-      if (possibleMatches.length > 0) {
-        return possibleMatches[0].path
+
+      if (exactMatch) return exactMatch.path
+
+      // If no exact match, try directory with index file
+      for (const ext of [".js", ".jsx", ".ts", ".tsx"]) {
+        const indexFile = `${importName}/index${ext}`
+        const matchIndex = allFiles.find((f) => f.path === indexFile)
+        if (matchIndex) return matchIndex.path
       }
     }
   
