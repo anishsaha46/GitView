@@ -149,7 +149,7 @@ export default function CodeVisualDemo() {
     node
       .append("circle")
       .attr("r", 8)
-      .attr("fill", (d: any) => getNodeColor(d.group))
+      .attr("fill", (d: Node) => getNodeColor(d.group))
       .attr("stroke", "#fff")
       .attr("stroke-width", 1.5)
 
@@ -158,22 +158,22 @@ export default function CodeVisualDemo() {
       .append("text")
       .attr("dx", 12)
       .attr("dy", ".35em")
-      .text((d: any) => d.id.split("/").pop())
+      .text((d: Node): string => d.id.split("/").pop() || d.id)
       .attr("font-size", "10px")
       .attr("fill", "#333")
 
     // Add title for hover tooltip
-    node.append("title").text((d: any) => d.id)
+    node.append("title").text((d: Node) => d.id)
 
     // Update positions on simulation tick
     simulation.on("tick", () => {
       link
-        .attr("x1", (d: any) => d.source.x)
-        .attr("y1", (d: any) => d.source.y)
-        .attr("x2", (d: any) => d.target.x)
-        .attr("y2", (d: any) => d.target.y)
+        .attr("x1", (d: Link) => (d.source as Node).x || 0)
+        .attr("y1", (d: Link) => (d.source as Node).y || 0)
+        .attr("x2", (d: Link) => (d.target as Node).x || 0)
+        .attr("y2", (d: Link) => (d.target as Node).y || 0)
 
-      node.attr("transform", (d: any) => `translate(${d.x},${d.y})`)
+      node.attr("transform", (d: Node) => `translate(${d.x || 0},${d.y || 0})`)
     })
 
     // Drag functionality
