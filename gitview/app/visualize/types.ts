@@ -55,12 +55,11 @@ export interface DependencyNode {
   export interface GitHubRepoResponse {
     id: number
     name: string
-    full_name: string
-    default_branch: string
-    private: boolean
     owner: {
       login: string
-      id: number
-      avatar_url: string
     }
+    description: string | null
+    visibility: string
+    default_branch: string
+    language: string | null
   }
