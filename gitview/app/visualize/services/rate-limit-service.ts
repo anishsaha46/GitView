@@ -49,7 +49,7 @@ export class RateLimitService {
 
   public async executeWithRetry<T>(
     apiCall: () => Promise<T>,
-    errorHandler?: (error: any) => Promise<void>
+    errorHandler?: (error: Error | RateLimitError) => Promise<void>
   ): Promise<T> {
     try {
       await this.checkRateLimit()
@@ -66,7 +66,11 @@ export class RateLimitService {
         }
       }
       if (errorHandler) {
-        await errorHandler(error)
+        // Type check and cast the error to ensure type safety
+        const typedError = error instanceof Error ? error :
+          error instanceof RateLimitError ? error :
+          new Error('Unknown error occurred');
+        await errorHandler(typedError)
       }
       throw error
     }
