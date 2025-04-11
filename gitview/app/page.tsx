@@ -4,18 +4,21 @@ import { useState, useEffect, useRef } from "react"
 import Link from "next/link"
 import Image from "next/image"
 import { motion } from "framer-motion"
-import { Github, ArrowRight, Code, GitBranch, GitMerge, GitPullRequest, ExternalLink, ChevronDown } from "lucide-react"
+import { Github, ArrowRight, Code, GitBranch, GitMerge, GitPullRequest, ExternalLink, ChevronDown, LogOut } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import CodeVisualDemo from "@/components/code-visual-demo"
 import FeatureCard from "@/components/feature-card"
 import TestimonialCard from "@/components/testimonial-card"
 import { useMobile } from "./hooks/use-mobile"
+import { useSession, signOut } from "next-auth/react"
+
 
 export default function Home() {
   const [scrolled, setScrolled] = useState(false)
   const demoRef = useRef<HTMLDivElement>(null)
   const isMobile = useMobile()
+  const { data: session, status } = useSession()
 
   useEffect(() => {
     const handleScroll = () => {
@@ -55,12 +58,27 @@ export default function Home() {
               Testimonials
             </Link>
           </div>
-          <Link href="/api/auth/signin">
-            <Button>
-              <Github className="mr-2 h-4 w-4" />
-              Login with GitHub
-            </Button>
-          </Link>
+          {status === "authenticated" ? (
+            <div className="flex items-center gap-4">
+              <Link href="/dashboard">
+                <Button variant="outline">
+                  <Github className="mr-2 h-4 w-4" />
+                  Dashboard
+                </Button>
+              </Link>
+              <Button variant="destructive" onClick={() => signOut()}>
+                <LogOut className="mr-2 h-4 w-4" />
+                Logout
+              </Button>
+            </div>
+          ) : (
+            <Link href="/api/auth/signin" className="inline-block">
+              <Button>
+                <Github className="mr-2 h-4 w-4" />
+                Login with GitHub
+              </Button>
+            </Link>
+          )}
         </div>
       </header>
 
@@ -98,12 +116,12 @@ export default function Home() {
                 transition={{ duration: 0.5, delay: 0.2 }}
               >
                 <Link href="/api/auth/signin">
-                  <Button size="lg" className="h-12 px-8">
+                  <Button className="h-12 px-8">
                     <Github className="mr-2 h-5 w-5" />
                     Get Started
                   </Button>
                 </Link>
-                <Button variant="outline" size="lg" className="h-12 px-8" onClick={scrollToDemo}>
+                <Button className="h-12 px-8" onClick={scrollToDemo}>
                   See It In Action
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
@@ -115,14 +133,10 @@ export default function Home() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.7, delay: 0.4 }}
               >
-                <div className="aspect-[16/9] rounded-xl overflow-hidden border shadow-2xl">
-                  <Image
-                    src="/placeholder.svg?height=1080&width=1920"
-                    alt="GitHub Code Visualizer Dashboard"
-                    width={1920}
-                    height={1080}
-                    className="object-cover"
-                  />
+                <div className="aspect-[16/9] rounded-xl overflow-hidden border shadow-2xl bg-muted">
+                  <div className="w-full h-full flex items-center justify-center">
+                    <GitBranch className="h-24 w-24 text-muted-foreground/20" />
+                  </div>
                   <div className="absolute inset-0 bg-gradient-to-t from-background/80 to-transparent" />
                   <div className="absolute bottom-4 left-0 right-0 flex justify-center">
                     <Button variant="ghost" size="sm" onClick={scrollToDemo}>
@@ -252,7 +266,7 @@ export default function Home() {
               </div>
 
               <Link href="/api/auth/signin">
-                <Button size="lg" className="h-12 px-8">
+                <Button className="h-12 px-8">
                   <Github className="mr-2 h-5 w-5" />
                   Get Started Now
                 </Button>
@@ -320,7 +334,7 @@ export default function Home() {
                 viewport={{ once: true }}
               >
                 <Link href="/api/auth/signin">
-                  <Button size="lg" variant="secondary" className="h-12 px-8 text-primary">
+                  <Button className="h-12 px-8 text-primary">
                     <Github className="mr-2 h-5 w-5" />
                     Start Visualizing Now
                   </Button>
