@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { useSession } from "next-auth/react"
-import { redirect } from "next/navigation"
+import { redirect, useSearchParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -14,32 +14,52 @@ import FileStructureTree from "@/components/file-structure-tree"
 import { fetchRepositoryData } from "@/app/visualize/services/repository-service"
 import type { FileNode, DependencyData } from "@/app/visualize/types"
 
-export default function VisualizeRepo({ params }: { params: { repo: string } }) {
+export default function VisualizeRepo() {
     const { data: session, status } = useSession()
+    const searchParams = useSearchParams()
     const [loading, setLoading] = useState(true)
     const [fileStructure, setFileStructure] = useState<FileNode[]>([])
     const [dependencies, setDependencies] = useState<DependencyData>({ nodes: [], links: [] })
     const [activeTab, setActiveTab] = useState("dependencies")
     const [error, setError] = useState<string | null>(null)
+
+    const owner = searchParams.get('owner')
+    const repoName = searchParams.get('name')
   
     useEffect(() => {
       if (status === "unauthenticated") {
         redirect("/")
       }
   
-      if (status === "authenticated" && session?.accessToken) {
-        loadRepositoryData(session.accessToken as string)
+      if (status === "authenticated") {
+        if (!session?.accessToken) {
+          setError("Authentication token is missing. Please try logging in again.")
+          setLoading(false)
+          return
+        }
+
+        if (!owner || !repoName) {
+          setError("Repository owner or name is missing.")
+          setLoading(false)
+          return
+        }
+
+        loadRepositoryData(session.accessToken)
       }
-    }, [status, session, params.repo])
+    }, [status, session, owner, repoName])
 
     const loadRepositoryData = async (accessToken: string) => {
         setLoading(true)
         setError(null)
     
         try {
+          if (!owner || !repoName) {
+            throw new Error("Repository owner or name is missing.")
+          }
+
           const { fileStructure, dependencies } = await fetchRepositoryData(
-            session?.user?.name || "",
-            params.repo,
+            owner,
+            repoName,
             accessToken,
           )
     
@@ -52,6 +72,27 @@ export default function VisualizeRepo({ params }: { params: { repo: string } }) 
           setLoading(false)
         }
       }
+
+    const exportData = () => {
+      if (!owner || !repoName) return
+
+      const data = {
+        repository: `${owner}/${repoName}`,
+        exportedAt: new Date().toISOString(),
+        dependencies,
+        fileStructure,
+      }
+
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement("a")
+      a.href = url
+      a.download = `${owner}-${repoName}-visualization.json`
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      URL.revokeObjectURL(url)
+    }
 
       if (status === "loading") {
         return (
@@ -68,13 +109,13 @@ export default function VisualizeRepo({ params }: { params: { repo: string } }) 
             <div className="container flex h-16 items-center justify-between px-4 sm:px-6 lg:px-8">
               <div className="flex items-center gap-4">
                 <Link href="/dashboard">
-                  <Button variant="ghost" size="icon">
+                  <Button variant="ghost" size="sm">
                     <ArrowLeft className="h-4 w-4" />
                   </Button>
                 </Link>
                 <h1 className="text-lg font-semibold flex items-center gap-2">
                   <GitBranch className="h-5 w-5" />
-                  {params.repo}
+                  {owner}/{repoName}
                 </h1>
               </div>
               <div className="flex items-center gap-2">
@@ -82,7 +123,12 @@ export default function VisualizeRepo({ params }: { params: { repo: string } }) 
                   <RefreshCw className="h-4 w-4 mr-2" />
                   Refresh
                 </Button>
-                <Button variant="outline" size="sm">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={exportData}
+                  disabled={loading || !!error || !dependencies.nodes.length}
+                >
                   <Download className="h-4 w-4 mr-2" />
                   Export
                 </Button>
