@@ -1,6 +1,7 @@
 import { buildFileTree } from "../utils/file-tree-builder"
 import { analyzeDependencies } from "../utils/dependency-analyzer"
 import type { FileNode, DependencyData, GitHubTreeResponse, GitHubRepoResponse } from "../types"
+import { RateLimitService } from './rate-limit-service'
 
 export async function fetchRepositoryData(
     username: string,
@@ -27,16 +28,20 @@ export async function fetchRepositoryData(
   }
 
   async function fetchDefaultBranch(username: string, repoName: string, accessToken: string): Promise<string> {
-    const response = await fetch(`https://api.github.com/repos/${username}/${repoName}`, {
-      headers: {
-        Accept: "application/vnd.github.v3+json",
-        Authorization: `Bearer ${accessToken}`,
-      },
+    const rateLimitService = RateLimitService.getInstance()
+    const response = await rateLimitService.executeWithRetry(async () => {
+      const response = await fetch(`https://api.github.com/repos/${username}/${repoName}`, {
+        headers: {
+          Accept: "application/vnd.github.v3+json",
+          Authorization: `Bearer ${accessToken}`,
+        },
+      })
+      rateLimitService.updateRateLimitInfo(response.headers)
+      if (!response.ok) {
+        await handleApiError(response)
+      }
+      return response
     })
-
-    if (!response.ok) {
-      await handleApiError(response)
-    }
   
     const repoInfo: GitHubRepoResponse = await response.json()
     return repoInfo.default_branch || "main"
@@ -49,16 +54,20 @@ export async function fetchRepositoryData(
     branch: string,
     accessToken: string,
   ): Promise<GitHubTreeResponse> {
-    const response = await fetch(`https://api.github.com/repos/${username}/${repoName}/git/trees/${branch}?recursive=1`, {
-      headers: {
-        Accept: "application/vnd.github.v3+json",
-        Authorization: `Bearer ${accessToken}`,
-      },
+    const rateLimitService = RateLimitService.getInstance()
+    const response = await rateLimitService.executeWithRetry(async () => {
+      const response = await fetch(`https://api.github.com/repos/${username}/${repoName}/git/trees/${branch}?recursive=1`, {
+        headers: {
+          Accept: "application/vnd.github.v3+json",
+          Authorization: `Bearer ${accessToken}`,
+        },
+      })
+      rateLimitService.updateRateLimitInfo(response.headers)
+      if (!response.ok) {
+        await handleApiError(response)
+      }
+      return response
     })
-
-    if (!response.ok) {
-      await handleApiError(response)
-    }
 
     const data: GitHubTreeResponse = await response.json()
   
