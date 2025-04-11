@@ -36,12 +36,12 @@ export default function CodeDependencyGraph({ data }: CodeDependencyGraphProps) 
     // Create the simulation with forces
     const simulation = d3
       .forceSimulation()
-      .nodes(data.nodes as d3.SimulationNodeDatum[])
+      .nodes(data.nodes as (DependencyNode & d3.SimulationNodeDatum)[])
       .force(
         "link",
         d3
-          .forceLink()
-          .id((d: any) => d.id)
+          .forceLink<DependencyNode & d3.SimulationNodeDatum, d3.SimulationLinkDatum<DependencyNode & d3.SimulationNodeDatum>>()
+          .id((d) => d.id)
           .links(data.links)
           .distance(100),
       )
@@ -107,7 +107,7 @@ export default function CodeDependencyGraph({ data }: CodeDependencyGraphProps) 
     node
       .append("circle")
       .attr("r", 8)
-      .attr("fill", (d: any) => getNodeColor(d.type))
+      .attr("fill", (d: DependencyNode) => getNodeColor(d.type))
       .attr("stroke", "#fff")
       .attr("stroke-width", 1.5)
 
@@ -116,22 +116,22 @@ export default function CodeDependencyGraph({ data }: CodeDependencyGraphProps) 
       .append("text")
       .attr("dx", 12)
       .attr("dy", ".35em")
-      .text((d: any) => d.label)
+      .text((d: DependencyNode) => d.label)
       .attr("font-size", "10px")
       .attr("fill", "#333")
 
     // Add title for hover tooltip
-    node.append("title").text((d: any) => d.id)
+    node.append("title").text((d: DependencyNode) => d.id)
 
     // Update positions on simulation tick
     simulation.on("tick", () => {
       link
-        .attr("x1", (d: any) => d.source.x)
-        .attr("y1", (d: any) => d.source.y)
-        .attr("x2", (d: any) => d.target.x)
-        .attr("y2", (d: any) => d.target.y)
+        .attr("x1", (d: d3.SimulationLinkDatum<DependencyNode & d3.SimulationNodeDatum>) => (d.source as any).x)
+        .attr("y1", (d: d3.SimulationLinkDatum<DependencyNode & d3.SimulationNodeDatum>) => (d.source as any).y)
+        .attr("x2", (d: d3.SimulationLinkDatum<DependencyNode & d3.SimulationNodeDatum>) => (d.target as any).x)
+        .attr("y2", (d: d3.SimulationLinkDatum<DependencyNode & d3.SimulationNodeDatum>) => (d.target as any).y)
 
-      node.attr("transform", (d: any) => `translate(${d.x},${d.y})`)
+      node.attr("transform", (d: DependencyNode & d3.SimulationNodeDatum) => `translate(${d.x},${d.y})`)
     })
 
     // Drag functionality
