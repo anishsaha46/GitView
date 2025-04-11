@@ -7,6 +7,10 @@ export async function fetchRepositoryData(
     repoName: string,
     accessToken: string,
   ): Promise<{ fileStructure: FileNode[]; dependencies: DependencyData }> {
+    if (!username || !repoName || !accessToken) {
+      throw new Error("Missing required parameters: username, repository name, or access token")
+    }
+
     // First get the default branch
     const defaultBranch = await fetchDefaultBranch(username, repoName, accessToken)
   
@@ -25,12 +29,13 @@ export async function fetchRepositoryData(
   async function fetchDefaultBranch(username: string, repoName: string, accessToken: string): Promise<string> {
     const response = await fetch(`https://api.github.com/repos/${username}/${repoName}`, {
       headers: {
+        Accept: "application/vnd.github.v3+json",
         Authorization: `Bearer ${accessToken}`,
       },
     })
-  
+
     if (!response.ok) {
-      handleApiError(response)
+      await handleApiError(response)
     }
   
     const repoInfo: GitHubRepoResponse = await response.json()
@@ -46,14 +51,15 @@ export async function fetchRepositoryData(
   ): Promise<GitHubTreeResponse> {
     const response = await fetch(`https://api.github.com/repos/${username}/${repoName}/git/trees/${branch}?recursive=1`, {
       headers: {
+        Accept: "application/vnd.github.v3+json",
         Authorization: `Bearer ${accessToken}`,
       },
     })
-  
+
     if (!response.ok) {
-      handleApiError(response)
+      await handleApiError(response)
     }
-  
+
     const data: GitHubTreeResponse = await response.json()
   
     if (data.truncated) {
@@ -64,21 +70,26 @@ export async function fetchRepositoryData(
   }
 
 
-  function handleApiError(response: Response): never {
+  async function handleApiError(response: Response): Promise<never> {
+    const errorData = await response.json().catch(() => ({}));
+    
     if (response.status === 404) {
-      throw new Error("Repository or branch not found")
+      throw new Error(errorData.message || "Repository or branch not found")
     } else if (response.status === 401) {
-      throw new Error("Authentication error. Please log in again.")
+      throw new Error(errorData.message || "Invalid or expired access token. Please log in again.")
     } else if (response.status === 403) {
       const rateLimitRemaining = response.headers.get("x-ratelimit-remaining")
-      if (rateLimitRemaining === "0") {
-        throw new Error("GitHub API rate limit exceeded. Please try again later.")
+      const rateLimitReset = response.headers.get("x-ratelimit-reset")
+      
+      if (rateLimitRemaining === "0" && rateLimitReset) {
+        const resetTime = new Date(parseInt(rateLimitReset) * 1000).toLocaleTimeString()
+        throw new Error(`GitHub API rate limit exceeded. Limit will reset at ${resetTime}`)
       }
-      throw new Error("Access forbidden. You may not have permission to view this repository.")
+      throw new Error(errorData.message || "Access forbidden. You may not have permission to view this repository.")
     } else if (response.status === 409) {
-      throw new Error("Repository is empty")
+      throw new Error(errorData.message || "Repository is empty or has conflicts")
     } else {
-      throw new Error(`GitHub API error: ${response.statusText}`)
+      throw new Error(errorData.message || `GitHub API error: ${response.statusText}`)
     }
   }
   
