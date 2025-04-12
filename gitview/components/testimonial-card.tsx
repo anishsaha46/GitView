@@ -21,7 +21,7 @@ export default function TestimonialCard({ quote, author, role, avatarUrl }: Test
     >
       <Card className="h-full overflow-hidden border transition-all duration-300 hover:shadow-md">
         <CardContent className="pt-6">
-          <div className="mb-4 text-4xl text-primary/20">"</div>
+          <div className="mb-4 text-4xl text-primary/20">&ldquo;</div>
           <p className="italic text-muted-foreground">{quote}</p>
         </CardContent>
         <CardFooter className="border-t bg-muted/20 pt-4">
