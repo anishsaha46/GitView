@@ -5,8 +5,11 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-5-blue)](https://www.typescriptlang.org/)
 [![D3.js](https://img.shields.io/badge/D3.js-7.9.0-orange)](https://d3js.org/)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind-3.3.3-38B2AC)](https://tailwindcss.com/)
+[![Netlify Status](https://api.netlify.com/api/v1/badges/status-badge/deploy-status)](https://gitview-code-visualizer.netlify.app/)
 
 GitView is a powerful web application that helps developers visualize and understand GitHub repositories through interactive code dependency graphs and file structure trees.
+
+🚀 **[Live Demo](https://gitview-code-visualizer.netlify.app/)**
 
 ![GitView Screenshot](public/window.svg)
 
@@ -35,9 +38,11 @@ Create a `.env.local` file in the root directory with the following variables:
 ```
 GITHUB_ID=your_github_oauth_app_client_id
 GITHUB_SECRET=your_github_oauth_app_client_secret
-NEXTAUTH_URL=http://localhost:3000
+NEXTAUTH_URL=http://localhost:3000 # Use your Netlify URL in production
 NEXTAUTH_SECRET=your_nextauth_secret
 ```
+
+For production deployment on Netlify, add these environment variables in your Netlify dashboard under Site settings > Environment variables.
 
 ### Installation
 
@@ -59,6 +64,18 @@ yarn dev
 ```
 
 4. Open [http://localhost:3000](http://localhost:3000) with your browser to see the application
+
+### Deployment
+
+This project is configured for deployment on Netlify. The deployment configuration is handled through `netlify.toml` in the root directory.
+
+1. Connect your GitHub repository to Netlify
+2. Configure the environment variables in Netlify dashboard
+3. Deploy using the following build settings:
+   - Build command: `npm run build`
+   - Publish directory: `.next`
+
+The application will be automatically deployed when you push changes to the main branch.
 
 ## Usage
 
