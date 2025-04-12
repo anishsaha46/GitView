@@ -12,8 +12,13 @@ export default function SignIn() {
   const handleSignIn = async () => {
     try {
       setIsLoading(true)
+      // Use the full absolute URL for the callback to ensure it's correct
+      const callbackUrl = typeof window !== 'undefined' 
+        ? `${window.location.origin}/dashboard`
+        : '/dashboard';
+        
       await signIn("github", { 
-        callbackUrl: "/dashboard",
+        callbackUrl,
         redirect: true 
       })
     } catch (error) {
