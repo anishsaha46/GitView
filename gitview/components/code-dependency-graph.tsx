@@ -21,6 +21,8 @@ interface CodeDependencyGraphProps {
   }
 }
 
+interface SimulationNodeType extends DependencyNode, d3.SimulationNodeDatum {}
+
 export default function CodeDependencyGraph({ data }: CodeDependencyGraphProps) {
   const svgRef = useRef<SVGSVGElement>(null)
 
@@ -101,6 +103,7 @@ export default function CodeDependencyGraph({ data }: CodeDependencyGraphProps) 
       .data(data.nodes)
       .join("g")
       .attr("class", "node")
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       .call(drag(simulation) as any)
 
     // Add circles to nodes
@@ -126,28 +129,40 @@ export default function CodeDependencyGraph({ data }: CodeDependencyGraphProps) 
     // Update positions on simulation tick
     simulation.on("tick", () => {
       link
-        .attr("x1", (d: d3.SimulationLinkDatum<DependencyNode & d3.SimulationNodeDatum>) => (d.source as any).x)
-        .attr("y1", (d: d3.SimulationLinkDatum<DependencyNode & d3.SimulationNodeDatum>) => (d.source as any).y)
-        .attr("x2", (d: d3.SimulationLinkDatum<DependencyNode & d3.SimulationNodeDatum>) => (d.target as any).x)
-        .attr("y2", (d: d3.SimulationLinkDatum<DependencyNode & d3.SimulationNodeDatum>) => (d.target as any).y)
+        .attr("x1", function(d: d3.SimulationLinkDatum<SimulationNodeType>) { 
+          const sourceNode = d.source as SimulationNodeType
+          return sourceNode.x || 0 
+        })
+        .attr("y1", function(d: d3.SimulationLinkDatum<SimulationNodeType>) { 
+          const sourceNode = d.source as SimulationNodeType
+          return sourceNode.y || 0 
+        })
+        .attr("x2", function(d: d3.SimulationLinkDatum<SimulationNodeType>) { 
+          const targetNode = d.target as SimulationNodeType
+          return targetNode.x || 0 
+        })
+        .attr("y2", function(d: d3.SimulationLinkDatum<SimulationNodeType>) { 
+          const targetNode = d.target as SimulationNodeType
+          return targetNode.y || 0 
+        })
 
-      node.attr("transform", (d: DependencyNode & d3.SimulationNodeDatum) => `translate(${d.x},${d.y})`)
+      node.attr("transform", (d: SimulationNodeType) => `translate(${d.x || 0},${d.y || 0})`)
     })
 
     // Drag functionality
     function drag(simulation: d3.Simulation<d3.SimulationNodeDatum, undefined>) {
-      function dragstarted(event: d3.D3DragEvent<SVGGElement, DependencyNode, any>, d: DependencyNode & d3.SimulationNodeDatum) {
+      function dragstarted(event: d3.D3DragEvent<SVGGElement, DependencyNode, DependencyNode>, d: DependencyNode & d3.SimulationNodeDatum) {
         if (!event.active) simulation.alphaTarget(0.3).restart()
         d.fx = event.x
         d.fy = event.y
       }
 
-      function dragged(event: d3.D3DragEvent<SVGGElement, DependencyNode, any>, d: DependencyNode & d3.SimulationNodeDatum) {
+      function dragged(event: d3.D3DragEvent<SVGGElement, DependencyNode, DependencyNode>, d: DependencyNode & d3.SimulationNodeDatum) {
         d.fx = event.x
         d.fy = event.y
       }
 
-      function dragended(event: d3.D3DragEvent<SVGGElement, DependencyNode, any>, d: DependencyNode & d3.SimulationNodeDatum) {
+      function dragended(event: d3.D3DragEvent<SVGGElement, DependencyNode, DependencyNode>, d: DependencyNode & d3.SimulationNodeDatum) {
         if (!event.active) simulation.alphaTarget(0)
         d.fx = null
         d.fy = null
@@ -188,4 +203,3 @@ export default function CodeDependencyGraph({ data }: CodeDependencyGraphProps) 
 
   return <svg ref={svgRef} className="w-full h-full" style={{ cursor: "grab" }} />
 }
-
