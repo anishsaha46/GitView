@@ -1,0 +1,114 @@
+# GitView - GitHub Repository Visualizer
+
+[![Next.js](https://img.shields.io/badge/Next.js-15.2.4-black)](https://nextjs.org/)
+[![React](https://img.shields.io/badge/React-19.0.0-blue)](https://reactjs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5-blue)](https://www.typescriptlang.org/)
+[![D3.js](https://img.shields.io/badge/D3.js-7.9.0-orange)](https://d3js.org/)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind-3.3.3-38B2AC)](https://tailwindcss.com/)
+
+GitView is a powerful web application that helps developers visualize and understand GitHub repositories through interactive code dependency graphs and file structure trees.
+
+![GitView Screenshot](public/window.svg)
+
+## Features
+
+- **GitHub Authentication**: Securely log in with your GitHub account to access your repositories
+- **Repository Visualization**: View your repositories in an intuitive, visual format
+- **File Structure Tree**: Navigate through repository files and directories in a hierarchical tree view
+- **Code Dependency Graph**: Visualize code dependencies between files using an interactive D3.js graph
+- **Export Functionality**: Export visualization data as JSON for offline analysis or sharing
+- **Responsive Design**: Works seamlessly on desktop and mobile devices
+
+## Getting Started
+
+### Prerequisites
+
+- Node.js 18.x or higher
+- npm or yarn
+- GitHub account
+- GitHub OAuth App credentials
+
+### Environment Setup
+
+Create a `.env.local` file in the root directory with the following variables:
+
+```
+GITHUB_ID=your_github_oauth_app_client_id
+GITHUB_SECRET=your_github_oauth_app_client_secret
+NEXTAUTH_URL=http://localhost:3000
+NEXTAUTH_SECRET=your_nextauth_secret
+```
+
+### Installation
+
+1. Clone the repository
+2. Install dependencies:
+
+```bash
+npm install
+# or
+yarn install
+```
+
+3. Run the development server:
+
+```bash
+npm run dev
+# or
+yarn dev
+```
+
+4. Open [http://localhost:3000](http://localhost:3000) with your browser to see the application
+
+## Usage
+
+1. **Login**: Click "Login with GitHub" on the homepage to authenticate with your GitHub account
+2. **Dashboard**: Browse your repositories on the dashboard page
+3. **Visualization**: Select a repository to visualize
+4. **Explore**: Switch between the dependency graph and file structure views using the tabs
+5. **Export**: Download the visualization data as JSON using the export button
+
+## Architecture
+
+GitView is built with the following technologies:
+
+- **Next.js**: React framework for server-rendered applications
+- **TypeScript**: Type-safe JavaScript
+- **NextAuth.js**: Authentication solution for Next.js
+- **D3.js**: Data visualization library for the dependency graphs
+- **Tailwind CSS**: Utility-first CSS framework for styling
+- **Prisma**: Database ORM for user data storage
+- **GitHub API**: For fetching repository data
+
+### Key Components
+
+- **Repository Service**: Handles GitHub API interactions to fetch repository data
+- **File Tree Builder**: Constructs hierarchical file structure from GitHub API data
+- **Dependency Analyzer**: Analyzes code files to extract import/export relationships
+- **Visualization Components**: Renders interactive file trees and dependency graphs
+
+## Limitations
+
+- GitHub API rate limits may affect large repositories
+- Currently supports a limited set of programming languages for dependency analysis
+- Repository analysis is capped at 30 files to avoid rate limiting
+
+## Future Enhancements
+
+- Support for more programming languages
+- Advanced code analysis features
+- Collaborative sharing of visualizations
+- Integration with CI/CD pipelines
+- Historical analysis of repository evolution
+
+## License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+## Acknowledgements
+
+- [Next.js](https://nextjs.org/) for the React framework
+- [D3.js](https://d3js.org/) for visualization capabilities
+- [GitHub API](https://docs.github.com/en/rest) for repository data access
+- [Tailwind CSS](https://tailwindcss.com/) for styling
+- [Lucide React](https://lucide.dev/) for icons
