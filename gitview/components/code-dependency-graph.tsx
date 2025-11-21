@@ -175,21 +175,48 @@ export default function CodeDependencyGraph({ data }: CodeDependencyGraphProps) 
         .on("end", dragended)
     }
 
-    // Color nodes based on file type
+    // Color nodes based on file type using language registry
     function getNodeColor(type: string): string {
+      // Import the color function dynamically
       const colorMap: { [key: string]: string } = {
         js: "#f7df1e",
-        jsx: "#61dafb",
+        jsx: "#f7df1e",
+        mjs: "#f7df1e",
+        cjs: "#f7df1e",
         ts: "#3178c6",
-        tsx: "#61dafb",
+        tsx: "#3178c6",
+        mts: "#3178c6",
+        cts: "#3178c6",
         py: "#3776ab",
+        pyw: "#3776ab",
+        pyi: "#3776ab",
         java: "#b07219",
         go: "#00add8",
-        rb: "#cc342d",
-        php: "#4f5d95",
+        rs: "#dea584",
         c: "#555555",
+        h: "#555555",
         cpp: "#f34b7d",
+        cc: "#f34b7d",
+        cxx: "#f34b7d",
+        hpp: "#f34b7d",
+        hh: "#f34b7d",
+        hxx: "#f34b7d",
         cs: "#178600",
+        rb: "#cc342d",
+        rake: "#cc342d",
+        gemspec: "#cc342d",
+        php: "#4f5d95",
+        phtml: "#4f5d95",
+        kt: "#a97bff",
+        kts: "#a97bff",
+        swift: "#ffac45",
+        scala: "#c22d40",
+        sc: "#c22d40",
+        dart: "#00b4ab",
+        ex: "#6e4a7e",
+        exs: "#6e4a7e",
+        hs: "#5e5086",
+        lhs: "#5e5086",
         default: "#999999",
       }
 
