@@ -5,10 +5,11 @@
 [[plugins]]
   package = "@netlify/plugin-nextjs"
 
-# The @netlify/plugin-nextjs handles API routes automatically.
-# We only need the fallback for client-side routing.
+[[redirects]]
+  from = "/api/*"
+  to = "/api/:splat"
+  status = 200
 
-# Fallback for client-side routing (e.g., for SPAs)
 [[redirects]]
   from = "/*"
   to = "/index.html"
