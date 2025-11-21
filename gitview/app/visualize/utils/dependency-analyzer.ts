@@ -1,4 +1,5 @@
 import { resolveRelativePath } from "./path-resolver"
+import { getLanguageByPath, getSupportedExtensions, getLanguageByExtension } from "./language-registry"
 import type { DependencyData, DependencyNode, DependencyLink, GitHubTreeItem, GitHubContentResponse } from "../types"
 
 export async function analyzeDependencies(
@@ -8,13 +9,11 @@ export async function analyzeDependencies(
   treeItems: GitHubTreeItem[],
   accessToken: string,
 ): Promise<DependencyData> {
-  // Filter code files
+  // Filter code files using language registry
+  const supportedExtensions = getSupportedExtensions()
   const codeFiles = treeItems.filter((item) => {
     const ext = item.path.split(".").pop()?.toLowerCase()
-    return (
-      item.type === "blob" &&
-      ["js", "jsx", "ts", "tsx", "py", "java", "go", "rb", "php", "c", "cpp", "cs"].includes(ext || "")
-    )
+    return item.type === "blob" && ext && supportedExtensions.includes(ext)
   })
 
   // Limit files to analyze to avoid rate limits
@@ -102,40 +101,26 @@ async function fetchFileContent(
     const imports: string[] = []
   
     try {
-      // JavaScript/TypeScript import detection
-      if (["js", "jsx", "ts", "tsx"].includes(fileType)) {
-        // ES6 imports
-        const es6ImportRegex = /import\s+(?:(?:{[^}]*}|\*\s+as\s+\w+|\w+)\s+from\s+)?['"]([^'"]+)['"]/g
-        let match
-        while ((match = es6ImportRegex.exec(content)) !== null) {
-          imports.push(match[1])
-        }
-  
-        // CommonJS require
-        const requireRegex = /require\s*$$\s*['"]([^'"]+)['"]\s*$$/g
-        while ((match = requireRegex.exec(content)) !== null) {
-          imports.push(match[1])
-        }
+      // Get language configuration
+      const language = getLanguageByExtension(fileType)
+      if (!language) {
+        console.warn(`Unsupported file type: ${fileType} for ${filePath}`)
+        return imports
       }
-  
-      // Python imports
-      else if (fileType === "py") {
-        const importRegex = /(?:from\s+(\S+)\s+import|import\s+(\S+))/g
+
+      // Apply all import patterns for this language
+      language.importPatterns.forEach(({ pattern, captureGroup }) => {
+        // Reset regex lastIndex for global patterns
+        pattern.lastIndex = 0
+        
         let match
-        while ((match = importRegex.exec(content)) !== null) {
-          const importPath = match[1] || match[2]
-          if (importPath) imports.push(importPath)
+        while ((match = pattern.exec(content)) !== null) {
+          const importPath = match[captureGroup]
+          if (importPath && importPath.trim()) {
+            imports.push(importPath.trim())
+          }
         }
-      }
-  
-      // Java imports
-      else if (fileType === "java") {
-        const importRegex = /import\s+([^;]+);/g
-        let match
-        while ((match = importRegex.exec(content)) !== null) {
-          imports.push(match[1])
-        }
-      }
+      })
     } catch (error) {
       console.warn(`Error extracting imports from ${filePath}:`, error)
     }
